@@ -165,61 +165,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.03),
-                Text(
-                  "Explore Categories",
-                  style: GoogleFonts.interTight(
-                      fontWeight: FontWeight.bold,
-                      fontSize: screenWidth * 0.06,
-                      color: Colors.white),
-                ),
-                SizedBox(height: screenHeight * 0.015),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      uiHelper().customCardButton(
-                          "🌡️ Medicinal",
-                              () {},
-                          screenHeight * 0.05,
-                          screenWidth * 0.33,
-                          const Color(0xFF20B2AA),
-                          screenWidth * 0.035),
-                      SizedBox(width: screenWidth * 0.04),
-                      uiHelper().customCardButton(
-                          "🔆 Seasonal",
-                              () {},
-                          screenHeight * 0.05,
-                          screenWidth * 0.33,
-                          const Color(0xFF9370DB),
-                          screenWidth * 0.035),
-                      SizedBox(width: screenWidth * 0.04),
-                      uiHelper().customCardButton(
-                          "🏠 Household",
-                              () {},
-                          screenHeight * 0.05,
-                          screenWidth * 0.33,
-                          const Color(0xFF228B22),
-                          screenWidth * 0.035),
-                      SizedBox(width: screenWidth * 0.04),
-                      uiHelper().customCardButton(
-                          "🤍 Immunity",
-                              () {},
-                          screenHeight * 0.05,
-                          screenWidth * 0.33,
-                          const Color(0xFFD6204E),
-                          screenWidth * 0.035),
-                      SizedBox(width: screenWidth * 0.04),
-                      uiHelper().customCardButton(
-                          "🧘 Ayurvedic",
-                              () {},
-                          screenHeight * 0.05,
-                          screenWidth * 0.33,
-                          const Color(0xFF4169E1),
-                          screenWidth * 0.035),
-                    ],
-                  ),
-                ),
                 SizedBox(height: screenHeight * 0.025),
                 Text(
                   "🌿 Herbal Collection",

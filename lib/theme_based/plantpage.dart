@@ -121,7 +121,7 @@ class _PlantPageState extends State<PlantPage> {
     if (widget.initialPlantName != null) {
       _searchPlantByName(
         widget.initialPlantName!,
-        widget.initialScientificName, // <-- Pass this
+        widget.initialScientificName,
       );
     }
 
@@ -335,7 +335,6 @@ class _PlantPageState extends State<PlantPage> {
     );
   }
 
-  //
 
   Widget buildInitialView() {
     return const Center(
@@ -358,7 +357,7 @@ class _PlantPageState extends State<PlantPage> {
               height: screenWidth * 0.5,
               width: screenWidth * 0.5,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(color: Colors.white30),
                 image: _plantImageUrl != null
@@ -430,14 +429,13 @@ class _PlantPageState extends State<PlantPage> {
           ]),
           _InfoSection(title: "Safety Info", content: plantData.extras.warnings),
           _InfoSection(title: "Fun Fact", content: plantData.extras.funFact),
-          const SizedBox(height: 80), // Space for FAB
+          const SizedBox(height: 80),
         ],
       ),
     );
   }
 }
 
-//
 
 class _QuickInfoRow extends StatelessWidget {
   final QuickInfo info;

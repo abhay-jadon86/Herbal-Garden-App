@@ -75,7 +75,7 @@ class _CollectionPageState extends State<CollectionPage>{
       MaterialPageRoute(
         builder: (context) => PlantPage(
           initialPlantName: herb.name,
-          initialScientificName: herb.scientificName, // <-- ADD THIS
+          initialScientificName: herb.scientificName, //
           initialImageUrl: herb.imageUrl,
         ),
       ),
@@ -170,7 +170,7 @@ class _CollectionPageState extends State<CollectionPage>{
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.eco_outlined, color: Colors.white.withOpacity(0.7), size: 100),
+            Icon(Icons.eco_outlined, color: Colors.white.withValues(alpha: 0.7), size: 100),
             const SizedBox(height: 20),
             Text(
               'Your collection is empty',
@@ -236,7 +236,7 @@ class HerbCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.8), Colors.transparent],
+                  colors: [Colors.black.withValues(alpha: 0.8), Colors.transparent],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
