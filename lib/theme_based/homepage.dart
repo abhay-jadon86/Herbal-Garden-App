@@ -5,6 +5,7 @@ import 'package:herbal_garden_app/theme_based/plantpage.dart';
 import 'collectionpage.dart';
 import 'package:herbal_garden_app/functionality_based/collection_storage.dart';
 import 'package:herbal_garden_app/functionality_based/herbal_item.dart';
+import 'package:herbal_garden_app/functionality_based/hotdservice.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
@@ -167,6 +168,61 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 SizedBox(height: screenHeight * 0.025),
                 Text(
+              "Explore Categories",
+              style: GoogleFonts.interTight(
+                  fontWeight: FontWeight.bold,
+                  fontSize: screenWidth * 0.06,
+                  color: Colors.white),
+            ),
+                SizedBox(height: screenHeight * 0.015),
+                SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  uiHelper().customCardButton(
+                      "🌡️ Medicinal",
+                          () {},
+                      screenHeight * 0.05,
+                      screenWidth * 0.33,
+                      const Color(0xFF20B2AA),
+                      screenWidth * 0.035),
+                  SizedBox(width: screenWidth * 0.04),
+                  uiHelper().customCardButton(
+                      "🔆 Seasonal",
+                          () {},
+                      screenHeight * 0.05,
+                      screenWidth * 0.33,
+                      const Color(0xFF9370DB),
+                      screenWidth * 0.035),
+                  SizedBox(width: screenWidth * 0.04),
+                  uiHelper().customCardButton(
+                      "🏠 Household",
+                          () {},
+                      screenHeight * 0.05,
+                      screenWidth * 0.33,
+                      const Color(0xFF228B22),
+                      screenWidth * 0.035),
+                  SizedBox(width: screenWidth * 0.04),
+                  uiHelper().customCardButton(
+                      "🤍 Immunity",
+                          () {},
+                      screenHeight * 0.05,
+                      screenWidth * 0.33,
+                      const Color(0xFFD6204E),
+                      screenWidth * 0.035),
+                  SizedBox(width: screenWidth * 0.04),
+                  uiHelper().customCardButton(
+                      "🧘 Ayurvedic",
+                          () {},
+                      screenHeight * 0.05,
+                      screenWidth * 0.33,
+                      const Color(0xFF4169E1),
+                      screenWidth * 0.035),
+                ],
+              ),
+            ) ,
+                SizedBox(height: screenHeight * 0.015),
+                Text(
                   "🌿 Herbal Collection",
                   style: GoogleFonts.interTight(
                       fontWeight: FontWeight.bold,
@@ -181,15 +237,59 @@ class _MyHomePageState extends State<MyHomePage> {
                   child: Row(
                     children: _collectionPreview.map((herb) {
                       return Padding(
-                        padding: EdgeInsets.only(right: screenWidth * 0.04),
-                        child: SizedBox(
-                          width: screenWidth * 0.4,
-                          height: screenWidth * 0.55,
-                          child: HerbCard(
-                            herb: herb,
-                            onTap: () => _navigateToSearchPage(herb),
-                            onLongPress: () {
-                            },
+                        padding: EdgeInsets.only(right: screenWidth * 0.03),
+                        child: GestureDetector(
+                          onTap: () => _navigateToSearchPage(herb),
+                          onLongPress: () {},
+                          child: Container(
+                            width: screenWidth * 0.55,
+                            padding: const EdgeInsets.all(6.0),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF16202A).withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(
+                                    herb.imageUrl,
+                                    width: screenWidth * 0.14,
+                                    height: screenWidth * 0.14,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                SizedBox(width: screenWidth * 0.03),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        herb.name,
+                                        style: GoogleFonts.interTight(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: screenWidth * 0.038,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        herb.scientificName,
+                                        style: GoogleFonts.interTight(
+                                          color: Colors.white60,
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: screenWidth * 0.032,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
@@ -209,9 +309,122 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(
                         color: Colors.grey, fontSize: screenWidth * 0.045),
                   ),
-                )
+                ),
+                const HerbOfTheDayWidget(),
+                SizedBox(height: screenHeight * 0.04),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class HerbOfTheDayWidget extends StatefulWidget {
+  const HerbOfTheDayWidget({super.key});
+
+  @override
+  State<HerbOfTheDayWidget> createState() => _HerbOfTheDayWidgetState();
+}
+
+class _HerbOfTheDayWidgetState extends State<HerbOfTheDayWidget> {
+  Map<String, String>? _dailyHerb;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchDailyHerb();
+  }
+
+  Future<void> _fetchDailyHerb() async {
+    final data = await DailyHerbService.getTodayHerbData();
+    if (mounted) {
+      setState(() {
+        _dailyHerb = data;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    if (_isLoading) {
+      return Container(
+        height: 180,
+        width: double.infinity,
+        margin: EdgeInsets.only(top: screenWidth * 0.05),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(color: Color(0xFF32CD32)),
+        ),
+      );
+    }
+    return Padding(
+      padding: EdgeInsets.only(top: screenWidth * 0.05),
+      child: Container(
+        width: double.infinity,
+        height: 180,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [
+            BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))
+          ],
+          image: DecorationImage(
+            image: NetworkImage(_dailyHerb!['imageUrl']!),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent],
+            ),
+          ),
+          padding: EdgeInsets.all(screenWidth * 0.04),
+          alignment: Alignment.bottomLeft,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "✨ Herb of the Day",
+                style: GoogleFonts.interTight(
+                  color: const Color(0xFF32CD32),
+                  fontWeight: FontWeight.bold,
+                  fontSize: screenWidth * 0.035,
+                ),
+              ),
+              SizedBox(height: screenWidth * 0.01),
+              Text(
+                _dailyHerb!['name']!,
+                style: GoogleFonts.interTight(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: screenWidth * 0.055,
+                ),
+              ),
+              SizedBox(height: screenWidth * 0.01),
+              Text(
+                _dailyHerb!['desc']!,
+                style: GoogleFonts.interTight(
+                  color: Colors.white70,
+                  fontSize: screenWidth * 0.035,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
       ),

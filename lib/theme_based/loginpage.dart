@@ -74,6 +74,43 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _handleForgotPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      _showError("Please enter your email address first to reset your password.");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Password reset link sent! Check your inbox."),
+            backgroundColor: Color(0xFF32CD32),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = "An error occurred";
+      if (e.code == 'invalid-email') {
+        message = "The email address is badly formatted.";
+      } else if (e.code == 'user-not-found') {
+        message = "No user found for that email.";
+      }
+      _showError(message ?? e.message ?? "Failed to send reset email");
+    } catch (e) {
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   Future<void> _handleSignUp() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       _showError("Enter email and password to create account");
@@ -209,9 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                           Align(
                             alignment: Alignment.centerRight,
                             child: GestureDetector(
-                              onTap: () {
-                                _showError("Forgot Password feature coming soon!");
-                              },
+                                onTap: _isLoading ? null : _handleForgotPassword,
                               child: Text(
                                 "Forgot Password?",
                                 style: GoogleFonts.interTight(
