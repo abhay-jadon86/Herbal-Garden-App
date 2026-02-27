@@ -1,116 +1,94 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class uiHelper {
-  customIcomButton(IconData icondata, VoidCallback voidcallback){
+class AppColors {
+  static const Color semiTransparentWhite = Color(0x33FFFFFF);
+  static const Color shadowColor = Color(0x33000000);
+  static const Color volumeIcon = Color(0xFF4169E1);
+  static const Color bookmarkIcon = Color(0xFFFF6347);
+  static const Color successGreen = Colors.green;
+  static const Color errorRed = Colors.redAccent;
+}
+
+class CustomIconButton extends StatelessWidget {
+  final IconData iconData;
+  final VoidCallback onPressed;
+
+  const CustomIconButton({
+    Key? key,
+    required this.iconData,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
         height: 35,
         width: 35,
-        decoration: BoxDecoration(
-          color: Color(0x33FFFFFF),
-          shape: BoxShape.circle
+        decoration: const BoxDecoration(
+          color: AppColors.semiTransparentWhite,
+          shape: BoxShape.circle,
         ),
-        child: IconButton(onPressed: voidcallback,
-            icon: Icon(icondata,
+        child: IconButton(
+          onPressed: onPressed,
+          icon: Icon(
+            iconData,
             size: 20,
-            color: Colors.white,)),
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
+}
 
-  customCardButton(String text , VoidCallback voidcallback, double hei, double? wid, Color color, double textsize){
+class CustomCardButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final double height;
+  final double? width;
+  final Color color;
+  final double textSize;
+
+  const CustomCardButton({
+    Key? key,
+    required this.text,
+    required this.onPressed,
+    required this.height,
+    this.width,
+    required this.color,
+    required this.textSize,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: voidcallback,
+      onTap: onPressed,
       child: Container(
-        height: hei,
-        width: wid,
+        height: height,
+        width: width,
         decoration: BoxDecoration(
-          boxShadow: [BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          )],
+          boxShadow: const [
+            BoxShadow(
+              color: AppColors.shadowColor,
+              blurRadius: 20,
+              offset: Offset(0, 8),
+            )
+          ],
           color: color,
-          borderRadius: BorderRadius.circular(15)
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Center(
-          child: Text(text,
+          child: Text(
+            text,
             style: GoogleFonts.interTight(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: textsize
-            ),),
-        ),
-      ),
-
-    );
-
-  }
-
-  customHerbContainer( String text , String subtext, String imageurl){
-    return Container(
-      height: 280,
-      width: 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [BoxShadow(
-          color: Color(0x33000000),
-          blurRadius: 15,
-          offset: Offset(0, 8)
-        )],
-           gradient: LinearGradient(colors: [Color(0x1AFFFFFF), Color(0x33FFFFFF)],
-        stops: [0,1],
-        begin: AlignmentDirectional(0, -1),
-        end: AlignmentDirectional(0, 1)
-        ),
-          ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              margin: EdgeInsetsDirectional.fromSTEB(0.0,20.0,20.0,0.0),
-              height: 150,
-              width: 150,
-              decoration: BoxDecoration(
-                color: Colors.black,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image.network(imageurl,
-                fit: BoxFit.cover,),
-              ),),
-            SizedBox(height: 8,),
-            Text(text, style:
-              GoogleFonts.interTight(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.white
-              ),),
-            Text(subtext, style:
-              GoogleFonts.interTight(
-                fontSize: 15,
-                color: Colors.white
-              ),),
-            SizedBox(height: 8,),
-            Row(
-              children: [
-                Icon(Icons.eco,color: Colors.green,size: 25,),
-                SizedBox(width: 10,),
-                Icon(Icons.volume_up, size: 25, color: Color(0xFF4169E1),),
-                SizedBox(width: 60,),
-                Icon(Icons.bookmark_border, size: 25, color: Color(0xFFFF6347),)
-
-              ],
+              fontSize: textSize,
             ),
-
-          ],
-
+          ),
         ),
       ),
     );

@@ -21,16 +21,27 @@ class PlantDetails {
 
   factory PlantDetails.fromJson(Map<String, dynamic> json) {
     return PlantDetails(
-      commonName: json['commonName'] ?? 'N/A',
-      scientificName: json['scientificName'] ?? 'N/A',
-      about: json['about'] ?? 'No description available.',
-      imageUrl: (json['imageUrl'] as String? ?? '').startsWith('http') ? json['imageUrl'] : '',
-      quickInfo: QuickInfo.fromJson(json['quickInfo'] ?? {}),
-      uses: Uses.fromJson(json['uses'] ?? {}),
-      growthGuide: GrowthGuide.fromJson(json['growthGuide'] ?? {}),
-      extras: Extras.fromJson(json['extras'] ?? {}),
+      commonName: json['commonName']?.toString() ?? 'N/A',
+      scientificName: json['scientificName']?.toString() ?? 'N/A',
+      about: json['about']?.toString() ?? 'No description available.',
+      imageUrl: json['imageUrl']?.toString() ?? '',
+      quickInfo: QuickInfo.fromJson(json['quickInfo'] as Map<String, dynamic>? ?? {}),
+      uses: Uses.fromJson(json['uses'] as Map<String, dynamic>? ?? {}),
+      growthGuide: GrowthGuide.fromJson(json['growthGuide'] as Map<String, dynamic>? ?? {}),
+      extras: Extras.fromJson(json['extras'] as Map<String, dynamic>? ?? {}),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'commonName': commonName,
+    'scientificName': scientificName,
+    'about': about,
+    'imageUrl': imageUrl,
+    'quickInfo': quickInfo.toJson(),
+    'uses': uses.toJson(),
+    'growthGuide': growthGuide.toJson(),
+    'extras': extras.toJson(),
+  };
 }
 
 class QuickInfo {
@@ -48,12 +59,19 @@ class QuickInfo {
 
   factory QuickInfo.fromJson(Map<String, dynamic> json) {
     return QuickInfo(
-      sunlight: json['sunlight'] ?? 'N/A',
-      watering: json['watering'] ?? 'N/A',
-      petSafety: json['petSafety'] ?? 'N/A',
-      growthEase: json['growthEase'] ?? 'N/A',
+      sunlight: json['sunlight']?.toString() ?? 'N/A',
+      watering: json['watering']?.toString() ?? 'N/A',
+      petSafety: json['petSafety']?.toString() ?? 'N/A',
+      growthEase: json['growthEase']?.toString() ?? 'N/A',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'sunlight': sunlight,
+    'watering': watering,
+    'petSafety': petSafety,
+    'growthEase': growthEase,
+  };
 }
 
 class Uses {
@@ -64,10 +82,15 @@ class Uses {
 
   factory Uses.fromJson(Map<String, dynamic> json) {
     return Uses(
-      medicinal: List<String>.from(json['medicinal'] ?? []),
-      culinary: List<String>.from(json['culinary'] ?? []),
+      medicinal: (json['medicinal'] as List?)?.map((e) => e.toString()).toList() ?? [],
+      culinary: (json['culinary'] as List?)?.map((e) => e.toString()).toList() ?? [],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'medicinal': medicinal,
+    'culinary': culinary,
+  };
 }
 
 class GrowthGuide {
@@ -83,11 +106,17 @@ class GrowthGuide {
 
   factory GrowthGuide.fromJson(Map<String, dynamic> json) {
     return GrowthGuide(
-      climate: json['climate'] ?? 'N/A',
-      soil: json['soil'] ?? 'N/A',
-      wateringSchedule: json['wateringSchedule'] ?? 'N/A',
+      climate: json['climate']?.toString() ?? 'N/A',
+      soil: json['soil']?.toString() ?? 'N/A',
+      wateringSchedule: json['wateringSchedule']?.toString() ?? 'N/A',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'climate': climate,
+    'soil': soil,
+    'wateringSchedule': wateringSchedule,
+  };
 }
 
 class Extras {
@@ -98,8 +127,13 @@ class Extras {
 
   factory Extras.fromJson(Map<String, dynamic> json) {
     return Extras(
-      warnings: json['warnings'] ?? 'None',
-      funFact: json['funFact'] ?? 'No fun fact available.',
+      warnings: json['warnings']?.toString() ?? 'None',
+      funFact: json['funFact']?.toString() ?? 'No fun fact available.',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'warnings': warnings,
+    'funFact': funFact,
+  };
 }

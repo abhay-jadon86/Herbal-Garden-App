@@ -132,11 +132,17 @@ class _PlantPageState extends State<PlantPage> {
     setState(() {
       _isLoading = true;
       _plantDetails = null;
+      _plantImageUrl = null;
       _errorText = "";
     });
 
     try {
       await _fetchInfoFromGemini(plantName, scientificName);
+      final searchName = _plantDetails?.commonName ?? plantName;
+      final wikiImage = await _getWikipediaImage(searchName);
+      setState(() {
+        _plantImageUrl = wikiImage;
+      });
     } catch (e) {
       setState(() {
         _errorText = "An error occurred. Please try again.\nDetails: $e";
@@ -146,6 +152,23 @@ class _PlantPageState extends State<PlantPage> {
         _isLoading = false;
       });
     }
+  }
+  Future<String?> _getWikipediaImage(String plantName) async {
+    try {
+      final formattedName = Uri.encodeComponent(plantName.replaceAll(' ', '_'));
+      final wikiUrl = Uri.parse('https://en.wikipedia.org/api/rest_v1/page/summary/$formattedName');
+
+      final response = await http.get(wikiUrl);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['thumbnail'] != null && data['thumbnail']['source'] != null) {
+          return data['thumbnail']['source'];
+        }
+      }
+    } catch (e) {
+      debugPrint("Wikipedia image fetch failed: $e");
+    }
+    return "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=600";
   }
 
   void _showImageSource(BuildContext context) {
@@ -236,7 +259,7 @@ class _PlantPageState extends State<PlantPage> {
       The JSON object must have this exact structure:
       {
         "commonName": "$commonName",
-        "scientificName": "${scientificName ?? 'Not available'}",
+        "scientificName": "${scientificName ?? 'Search and provide the primary scientific name'}",
         "about": "A brief, engaging paragraph about the plant, maximum 2-3 sentences.",
         "quickInfo": {
           "sunlight": "Full Sun | Partial Shade | Full Shade",

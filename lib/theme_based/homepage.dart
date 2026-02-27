@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:herbal_garden_app/functionality_based/uihelper.dart';
 import 'package:herbal_garden_app/theme_based/plantpage.dart';
 import 'collectionpage.dart';
 import 'package:herbal_garden_app/functionality_based/collection_storage.dart';
 import 'package:herbal_garden_app/functionality_based/herbal_item.dart';
 import 'package:herbal_garden_app/functionality_based/hotdservice.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
+import 'package:herbal_garden_app/functionality_based/categories.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -66,6 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
+    final String userName = FirebaseAuth.instance.currentUser?.displayName?.split(' ').first ?? 'Explorer';
 
     return Scaffold(
       backgroundColor: const Color(0xFF1D2428),
@@ -90,9 +91,19 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           Row(
             children: [
-              uiHelper()
-                  .customIcomButton(Icons.search, () => print("Search Button Pressed")),
-              uiHelper().customIcomButton(Icons.mic, () => print("Mic Button Pressed")),
+              CustomIconButton(
+                  iconData: Icons.search,
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const PlantPage())
+                    ).then((_) {});
+                  }
+              ),
+              CustomIconButton(
+                  iconData: Icons.mic,
+                  onPressed: () => debugPrint("Mic Button Pressed")
+              ),
             ],
           )
         ],
@@ -119,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   decoration: BoxDecoration(
                       boxShadow: const [
                         BoxShadow(
-                          color: Color(0x33000000),
+                          color: AppColors.shadowColor, // Used AppColors
                           blurRadius: 20,
                           offset: Offset(0, 8),
                         ),
@@ -136,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Column(
                       children: [
                         Text(
-                          "Hello Abhay! Ready to explore Nature's pharmacy?",
+                          "Hello $userName! Ready to explore Nature's pharmacy?", // Dynamic Name
                           textAlign: TextAlign.center,
                           style: GoogleFonts.interTight(
                               color: Colors.white,
@@ -153,74 +164,84 @@ class _MyHomePageState extends State<MyHomePage> {
                               fontWeight: FontWeight.w500),
                         ),
                         SizedBox(height: screenHeight * 0.02),
-                        uiHelper().customCardButton(
-                            "🌱 Scan a Plant",
-                                () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=> PlantPage()));
+                        CustomCardButton(
+                            text: "🌱 Scan a Plant",
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=> const PlantPage()));
                             },
-                            screenHeight * 0.06,
-                            screenWidth * 0.65,
-                            const Color(0xFF32CD32),
-                            screenWidth * 0.045),
+                            height: screenHeight * 0.06,
+                            width: screenWidth * 0.65,
+                            color: const Color(0xFF32CD32),
+                            textSize: screenWidth * 0.045),
                       ],
                     ),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.025),
                 Text(
-              "Explore Categories",
-              style: GoogleFonts.interTight(
-                  fontWeight: FontWeight.bold,
-                  fontSize: screenWidth * 0.06,
-                  color: Colors.white),
-            ),
+                  "Explore Categories",
+                  style: GoogleFonts.interTight(
+                      fontWeight: FontWeight.bold,
+                      fontSize: screenWidth * 0.06,
+                      color: Colors.white),
+                ),
                 SizedBox(height: screenHeight * 0.015),
                 SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  uiHelper().customCardButton(
-                      "🌡️ Medicinal",
-                          () {},
-                      screenHeight * 0.05,
-                      screenWidth * 0.33,
-                      const Color(0xFF20B2AA),
-                      screenWidth * 0.035),
-                  SizedBox(width: screenWidth * 0.04),
-                  uiHelper().customCardButton(
-                      "🔆 Seasonal",
-                          () {},
-                      screenHeight * 0.05,
-                      screenWidth * 0.33,
-                      const Color(0xFF9370DB),
-                      screenWidth * 0.035),
-                  SizedBox(width: screenWidth * 0.04),
-                  uiHelper().customCardButton(
-                      "🏠 Household",
-                          () {},
-                      screenHeight * 0.05,
-                      screenWidth * 0.33,
-                      const Color(0xFF228B22),
-                      screenWidth * 0.035),
-                  SizedBox(width: screenWidth * 0.04),
-                  uiHelper().customCardButton(
-                      "🤍 Immunity",
-                          () {},
-                      screenHeight * 0.05,
-                      screenWidth * 0.33,
-                      const Color(0xFFD6204E),
-                      screenWidth * 0.035),
-                  SizedBox(width: screenWidth * 0.04),
-                  uiHelper().customCardButton(
-                      "🧘 Ayurvedic",
-                          () {},
-                      screenHeight * 0.05,
-                      screenWidth * 0.33,
-                      const Color(0xFF4169E1),
-                      screenWidth * 0.035),
-                ],
-              ),
-            ) ,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      CustomCardButton(
+                          text: "🌡️ Medicinal",
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const CategoryPage(category: "Medicinal")
+                          )),
+                          height: screenHeight * 0.05,
+                          width: screenWidth * 0.33,
+                          color: const Color(0xFF20B2AA),
+                          textSize: screenWidth * 0.035),
+                      SizedBox(width: screenWidth * 0.04),
+                      CustomCardButton(
+                          text: "🔆 Seasonal",
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const CategoryPage(category: "Seasonal")
+                          )),
+                          height: screenHeight * 0.05,
+                          width: screenWidth * 0.33,
+                          color: const Color(0xFF9370DB),
+                          textSize: screenWidth * 0.035),
+                      SizedBox(width: screenWidth * 0.04),
+                      CustomCardButton(
+                          text: "🏠 Household",
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const CategoryPage(category: "Household & Indoor")
+                          )),
+                          height: screenHeight * 0.05,
+                          width: screenWidth * 0.33,
+                          color: const Color(0xFF228B22),
+                          textSize: screenWidth * 0.035),
+                      SizedBox(width: screenWidth * 0.04),
+                      CustomCardButton(
+                          text: "🤍 Immunity",
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const CategoryPage(category: "Immunity Boosting")
+                          )),
+                          height: screenHeight * 0.05,
+                          width: screenWidth * 0.33,
+                          color: const Color(0xFFD6204E),
+                          textSize: screenWidth * 0.035),
+                      SizedBox(width: screenWidth * 0.04),
+                      CustomCardButton(
+                          text: "🧘 Ayurvedic",
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(
+                              builder: (context) => const CategoryPage(category: "Ayurvedic")
+                          )),
+                          height: screenHeight * 0.05,
+                          width: screenWidth * 0.33,
+                          color: const Color(0xFF4169E1),
+                          textSize: screenWidth * 0.035),
+                    ],
+                  ),
+                ) ,
                 SizedBox(height: screenHeight * 0.015),
                 Text(
                   "🌿 Herbal Collection",
@@ -245,7 +266,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             width: screenWidth * 0.55,
                             padding: const EdgeInsets.all(6.0),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF16202A).withOpacity(0.6),
+                              color: const Color(0xFF16202A).withValues(alpha: 0.6),
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Row(
@@ -257,6 +278,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                     width: screenWidth * 0.14,
                                     height: screenWidth * 0.14,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Container(
+                                      width: screenWidth * 0.14,
+                                      height: screenWidth * 0.14,
+                                      color: Colors.grey[800],
+                                      child: const Icon(Icons.broken_image, color: Colors.white54),
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: screenWidth * 0.03),
@@ -321,7 +348,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-
 class HerbOfTheDayWidget extends StatefulWidget {
   const HerbOfTheDayWidget({super.key});
 
@@ -369,62 +395,77 @@ class _HerbOfTheDayWidgetState extends State<HerbOfTheDayWidget> {
     }
     return Padding(
       padding: EdgeInsets.only(top: screenWidth * 0.05),
-      child: Container(
-        width: double.infinity,
-        height: 180,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))
-          ],
-          image: DecorationImage(
-            image: NetworkImage(_dailyHerb!['imageUrl']!),
-            fit: BoxFit.cover,
-          ),
-        ),
+      child: GestureDetector(
+        onTap: () {
+          if (_dailyHerb != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PlantPage(
+                  initialPlantName: _dailyHerb!['name'],
+                  initialImageUrl: _dailyHerb!['imageUrl'],
+                ),
+              ),
+            );
+          }
+        },
         child: Container(
+          width: double.infinity,
+          height: 180,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent],
+            boxShadow: const [
+              BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))
+            ],
+            image: DecorationImage(
+              image: NetworkImage(_dailyHerb!['imageUrl']!),
+              fit: BoxFit.cover,
             ),
           ),
-          padding: EdgeInsets.all(screenWidth * 0.04),
-          alignment: Alignment.bottomLeft,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "✨ Herb of the Day",
-                style: GoogleFonts.interTight(
-                  color: const Color(0xFF32CD32),
-                  fontWeight: FontWeight.bold,
-                  fontSize: screenWidth * 0.035,
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                colors: [Colors.black.withValues(alpha: 0.9), Colors.transparent],
               ),
-              SizedBox(height: screenWidth * 0.01),
-              Text(
-                _dailyHerb!['name']!,
-                style: GoogleFonts.interTight(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: screenWidth * 0.055,
+            ),
+            padding: EdgeInsets.all(screenWidth * 0.04),
+            alignment: Alignment.bottomLeft,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "✨ Herb of the Day",
+                  style: GoogleFonts.interTight(
+                    color: const Color(0xFF32CD32),
+                    fontWeight: FontWeight.bold,
+                    fontSize: screenWidth * 0.035,
+                  ),
                 ),
-              ),
-              SizedBox(height: screenWidth * 0.01),
-              Text(
-                _dailyHerb!['desc']!,
-                style: GoogleFonts.interTight(
-                  color: Colors.white70,
-                  fontSize: screenWidth * 0.035,
+                SizedBox(height: screenWidth * 0.01),
+                Text(
+                  _dailyHerb!['name']!,
+                  style: GoogleFonts.interTight(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: screenWidth * 0.055,
+                  ),
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+                SizedBox(height: screenWidth * 0.01),
+                Text(
+                  _dailyHerb!['desc']!,
+                  style: GoogleFonts.interTight(
+                    color: Colors.white70,
+                    fontSize: screenWidth * 0.035,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ),
       ),
