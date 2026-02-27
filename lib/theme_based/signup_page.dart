@@ -11,6 +11,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -32,34 +33,56 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email);
+  }
+
   Future<void> _handleSignUp() async {
-    if (_emailController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _confirmPasswordController.text.isEmpty) {
-      _showError("Please fill in all fields");
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      _showError("Please fill in all fields", isError: true);
       return;
     }
 
-    if (_passwordController.text != _confirmPasswordController.text) {
-      _showError("Passwords do not match");
+    if (!_isValidEmail(email)) {
+      _showError("Please enter a valid email address", isError: true);
+      return;
+    }
+
+    if (password != confirmPassword) {
+      _showError("Passwords do not match", isError: true);
+      return;
+    }
+
+    if (password.length < 6) {
+      _showError("Password must be at least 6 characters", isError: true);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      _showError("Account created successfully!");
+      await userCredential.user?.updateDisplayName(name);
+      await userCredential.user?.sendEmailVerification();
+
+      _showError("Account created! A verification email has been sent.", isError: false);
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -69,23 +92,21 @@ class _SignUpPageState extends State<SignUpPage> {
         );
       }
     } on FirebaseAuthException catch (e) {
-      String message = e.message ?? "Sign up failed";
+      String message = "Sign up failed";
       if (e.code == 'email-already-in-use') {
         message = "This email is already registered.";
-      } else if (e.code == 'weak-password') {
-        message = "Password must be at least 6 characters.";
       }
-      _showError(message);
+      _showError(message, isError: true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  void _showError(String message) {
+  void _showError(String message, {required bool isError}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: _accentGreen.withValues(alpha: 0.8),
+        backgroundColor: isError ? Colors.redAccent : _accentGreen,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -128,7 +149,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.04),
-
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -140,7 +160,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         end: AlignmentDirectional(0, 1),
                       ),
                       border: Border.all(
-                          color: Colors.white.withOpacity(0.2), width: 1),
+                          color: Colors.white.withValues(alpha: 0.2), width: 1),
                       boxShadow: const [
                         BoxShadow(
                             color: Color(0x33000000),
@@ -152,6 +172,13 @@ class _SignUpPageState extends State<SignUpPage> {
                       padding: EdgeInsets.all(screenWidth * 0.06),
                       child: Column(
                         children: [
+                          _buildTextField(
+                            controller: _nameController,
+                            hintText: "Full Name",
+                            icon: Icons.person_outline,
+                            screenWidth: screenWidth,
+                          ),
+                          SizedBox(height: screenHeight * 0.025),
                           _buildTextField(
                             controller: _emailController,
                             hintText: "Email Address",
@@ -182,7 +209,6 @@ class _SignUpPageState extends State<SignUpPage> {
                             !_isConfirmPasswordVisible),
                           ),
                           SizedBox(height: screenHeight * 0.04),
-
                           SizedBox(
                             width: double.infinity,
                             height: screenHeight * 0.065,
@@ -217,7 +243,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.04),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

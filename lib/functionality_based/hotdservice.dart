@@ -3,13 +3,15 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 
 class DailyHerbService {
   static Future<Map<String, String>> getTodayHerbData() async {
     final prefs = await SharedPreferences.getInstance();
 
     final now = DateTime.now();
-    final todayString = "${now.year}-${now.month}-${now.day}";
+    final todayString = DateFormat('yyyy-MM-dd').format(now);
     final savedDate = prefs.getString('herb_date');
 
     if (savedDate == todayString) {
@@ -22,26 +24,34 @@ class DailyHerbService {
 
     String herbName = "Holy Basil";
     String herbDesc = "The Queen of Herbs for stress relief.";
+    bool fetchSuccessful = false;
+
     try {
       final geminiKey = dotenv.env['GEMINI_APIKEY'] ?? '';
-      final model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: geminiKey);
+      final model = GenerativeModel(
+        model: 'gemini-1.5-flash',
+        apiKey: geminiKey,
+        generationConfig: GenerationConfig(responseMimeType: 'application/json'),
+      );
 
       final prompt = '''
       You are an expert botanist. Pick a random, popular medicinal herb. 
       Respond ONLY with a valid JSON object containing exactly two keys: 
       "name" (the name of the herb) and "desc" (a short, 10-word catchy description of its main healing property).
-      Do not include markdown formatting or any other text.
       ''';
 
       final response = await model.generateContent([Content.text(prompt)]);
-      final cleanJson = response.text?.replaceAll('```json', '').replaceAll('```', '').trim() ?? '{}';
-      final aiData = json.decode(cleanJson);
 
-      if (aiData['name'] != null) herbName = aiData['name'];
-      if (aiData['desc'] != null) herbDesc = aiData['desc'];
+      if (response.text != null) {
+        final aiData = json.decode(response.text!);
+        if (aiData['name'] != null) herbName = aiData['name'];
+        if (aiData['desc'] != null) herbDesc = aiData['desc'];
+        fetchSuccessful = true;
+      }
     } catch (e) {
-      print("Gemini API error: $e");
+      debugPrint("Gemini API error: $e");
     }
+
     String imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Ocimum_tenuiflorum_2.jpg/800px-Ocimum_tenuiflorum_2.jpg';
 
     try {
@@ -56,12 +66,16 @@ class DailyHerbService {
         }
       }
     } catch (e) {
-      print("Wikipedia network error.");
+      debugPrint("Wikipedia network error: $e");
+      fetchSuccessful = false;
     }
-    await prefs.setString('herb_date', todayString);
-    await prefs.setString('herb_name', herbName);
-    await prefs.setString('herb_desc', herbDesc);
-    await prefs.setString('herb_image', imageUrl);
+
+    if (fetchSuccessful) {
+      await prefs.setString('herb_date', todayString);
+      await prefs.setString('herb_name', herbName);
+      await prefs.setString('herb_desc', herbDesc);
+      await prefs.setString('herb_image', imageUrl);
+    }
 
     return {
       "name": herbName,

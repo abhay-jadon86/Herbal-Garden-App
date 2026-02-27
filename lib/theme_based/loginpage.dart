@@ -14,7 +14,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool _isPasswordVisible = false;
@@ -35,9 +34,22 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  bool _isValidEmail(String email) {
+    return RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(email);
+  }
+
   Future<void> _handleLogin() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
       _showError("Please fill in all fields");
+      return;
+    }
+
+    if (!_isValidEmail(email)) {
+      _showError("Please enter a valid email address");
       return;
     }
 
@@ -45,8 +57,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _auth.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+        email: email,
+        password: password,
       );
 
       if (mounted) {
@@ -59,8 +71,8 @@ class _LoginPageState extends State<LoginPage> {
       String message = "An error occurred";
       if (e.code == 'user-not-found') {
         message = "No user found for that email.";
-      } else if (e.code == 'wrong-password') {
-        message = "Wrong password provided.";
+      } else if (e.code == 'invalid-credential' || e.code == 'wrong-password') {
+        message = "Incorrect email or password.";
       } else if (e.code == 'invalid-email') {
         message = "The email address is badly formatted.";
       } else if (e.code == 'network-request-failed') {
@@ -68,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
       }
       _showError(message);
     } catch (e) {
-      _showError(e.toString());
+      _showError("An unexpected error occurred.");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -102,43 +114,6 @@ class _LoginPageState extends State<LoginPage> {
         message = "The email address is badly formatted.";
       } else if (e.code == 'user-not-found') {
         message = "No user found for that email.";
-      }
-      _showError(message ?? e.message ?? "Failed to send reset email");
-    } catch (e) {
-      _showError(e.toString());
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleSignUp() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      _showError("Enter email and password to create account");
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    try {
-      await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      _showError("Account created! Logging you in...");
-
-      if (mounted) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MyHomePage())
-        );
-      }
-    } on FirebaseAuthException catch (e) {
-      String message = e.message ?? "Sign up failed";
-      if (e.code == 'email-already-in-use') {
-        message = "This email is already registered.";
-      } else if (e.code == 'weak-password') {
-        message = "Password should be at least 6 characters.";
       }
       _showError(message);
     } finally {
@@ -181,7 +156,6 @@ class _LoginPageState extends State<LoginPage> {
                     size: screenWidth * 0.15,
                   ),
                   SizedBox(height: screenHeight * 0.02),
-
                   Text(
                     "Welcome Back",
                     style: GoogleFonts.interTight(
@@ -199,7 +173,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.05),
-
                   Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -233,7 +206,6 @@ class _LoginPageState extends State<LoginPage> {
                             screenWidth: screenWidth,
                           ),
                           SizedBox(height: screenHeight * 0.025),
-
                           _buildTextField(
                             controller: _passwordController,
                             hintText: "Password",
@@ -242,11 +214,10 @@ class _LoginPageState extends State<LoginPage> {
                             isPassword: true,
                           ),
                           SizedBox(height: screenHeight * 0.02),
-
                           Align(
                             alignment: Alignment.centerRight,
                             child: GestureDetector(
-                                onTap: _isLoading ? null : _handleForgotPassword,
+                              onTap: _isLoading ? null : _handleForgotPassword,
                               child: Text(
                                 "Forgot Password?",
                                 style: GoogleFonts.interTight(
@@ -258,7 +229,6 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ),
                           SizedBox(height: screenHeight * 0.04),
-
                           SizedBox(
                             width: double.infinity,
                             height: screenHeight * 0.065,
@@ -296,7 +266,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: screenHeight * 0.04),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
